@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if party.candidates|length > 1 %}
+  <a href="{{ url_for('party_detail', party_slug=party.slug) }}"
+     class="inline-block text-blue-600 hover:underline mb-2 text-sm">
+    ← {{ party.name }} 정당 페이지로 돌아가기
+  </a>
+{% else %}
+  <a href="{{ url_for('index') }}"
+     class="inline-block text-blue-600 hover:underline mb-2 text-sm">
+    ← 정당 목록으로 돌아가기
+  </a>
+{% endif %}
+
+<h1 class="text-2xl font-bold mb-4">
+  {{ candidate.name }} 후보 ({{ party.name }})
+</h1>
+
+<div class="bg-white p-4 rounded shadow mb-4">
+  <p><strong>출생:</strong> {{ candidate.birth }}</p>
+  <p><strong>현직:</strong> {{ candidate.current_position }}</p>
+  {% if candidate.campaign_team %}
+    <p><strong>선거캠프:</strong> {{ candidate.campaign_team }}</p>
+  {% endif %}
+  <p><strong>약력:</strong> {{ candidate.biography }}</p>
+  {% if candidate.namu %}
+  <p><strong>참고:</strong> <a href="{{ candidate.namu }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">나무위키</a></p>
+  {% endif %}
+</div>
+{% if candidate.pledges and candidate.pledges|length > 0 %}
+<h2 class="text-xl font-semibold mb-2">공약</h2>
+<ul class="list-disc list-inside mb-6">
+  {% for pledge in candidate.pledges %}
+  <li>{{ pledge.title }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+
+{% if candidate.controversies and candidate.controversies|length > 0 %}
+  <h2 class="text-xl font-semibold mb-2">논란</h2>
+  <ul class="list-disc list-inside mb-6">
+    {% for controversy in candidate.controversies %}
+      <li class="mb-2">
+        <button 
+          class="bg-gray-200 text-gray-800 px-2 py-1 rounded hover:bg-gray-300 focus:outline-none"
+          onclick="toggleDetails('controversy-{{ loop.index }}')">
+          {{ controversy.issue }}
+        </button>
+        <div id="controversy-{{ loop.index }}" class="mt-1 ml-4 hidden text-sm text-gray-700">
+          <p>{{ controversy.details }}</p>
+          {% if controversy.source %}
+            <p class="mt-1">
+              🔗 <a href="{{ controversy.source }}" target="_blank" class="text-blue-500 hover:underline">
+                관련 기사 보기
+              </a>
+            </p>
+          {% endif %}
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+<div class="bg-gray-50 p-4 rounded shadow">
+  <h2 class="text-xl font-semibold mb-2">공약 분석 질의응답</h2>
+  <p class="text-sm text-gray-700 mb-3">
+    해당 후보의 공약에 대해 궁금한 점을 질문하세요.<br>
+    <span class="text-xs text-gray-500">
+      ※ 한정된 정보만을 기반으로 gemma3으로 답변하며, 후보자 또는 정당 또는 특정 세력을 대표하는 답변이 아닙니다.
+    </span>
+  </p>
+
+  <div id="chat-container" class="border rounded h-64 overflow-auto mb-3 bg-white p-3 space-y-2 text-sm"></div>
+
+  <div class="flex items-center">
+    <input type="text" id="question" class="border p-2 flex-1 rounded" placeholder="질문을 입력하세요." />
+    <button onclick="askQuestion()" class="bg-blue-600 text-white px-4 py-2 ml-2 rounded">
+      질문
+    </button>
+  </div>
+</div>
+
+<script>
+  const chatContainer = document.getElementById('chat-container');
+  const questionInput = document.getElementById('question');
+  const askButton = document.querySelector('button[onclick="askQuestion()"]');
+  let isWaiting = false;
+
+  function toggleDetails(id) {
+    const el = document.getElementById(id);
+    if (el.classList.contains('hidden')) {
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  }
+    
+  function addMessage(text, sender = 'user') {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = sender === 'user' ? 'text-right' : 'text-left';
+
+    const messageHTML = sender === 'ai'
+      ? marked.parse(text)
+      : text;
+
+    msgDiv.innerHTML = `
+      <span class="inline-block rounded px-3 py-2 ${
+        sender === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'
+      }">${messageHTML}</span>
+    `;
+
+    chatContainer.appendChild(msgDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+
+  function getChatHistory() {
+    const messages = [];
+    chatContainer.childNodes.forEach(node => {
+      if (node.classList.contains('text-right')) {
+        messages.push({"role": "user", "content": node.textContent});
+      } else {
+        messages.push({"role": "assistant", "content": node.textContent});
+      }
+    });
+    return messages;
+  }
+
+  function askQuestion() {
+    if (isWaiting) {
+      alert("답변을 기다려주세요!");
+      return;
+    }
+
+    const question = questionInput.value.trim();
+    if (!question) return;
+
+    const chat_history = getChatHistory();
+
+    isWaiting = true;
+    questionInput.disabled = true;
+    askButton.disabled = true;
+
+    addMessage(question, 'user');
+    questionInput.value = '';
+
+
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'text-left';
+    loadingDiv.setAttribute('id', 'loading-msg');
+    loadingDiv.innerHTML = `
+      <span class="inline-block rounded px-3 py-2 bg-gray-100 text-gray-500">
+        <span class="dot-typing">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+      </span>
+    `;
+    chatContainer.appendChild(loadingDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;    
+
+    fetch("{{ url_for('ask_candidate', party_slug=party.slug, candidate_index=candidate_index) }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, chat_history })
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.answer) {
+          addMessage(data.answer, 'ai');
+        } else if (data.error) {
+          addMessage("오류: " + data.error, 'ai');
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        addMessage("오류가 발생했습니다.", 'ai');
+      })
+      .finally(() => {
+        const loadingEl = document.getElementById('loading-msg');
+        if (loadingEl) loadingEl.remove();
+
+        isWaiting = false;
+        questionInput.disabled = false;
+        askButton.disabled = false;
+        questionInput.focus();
+      });
+  }
+  askButton.addEventListener('click', askQuestion);
+  questionInput.addEventListener('keyup', e => {
+    if (e.key === 'Enter' && questionInput.value.trim()){
+      askQuestion();
+    }
+  });
+</script>
+
+{% endblock %}

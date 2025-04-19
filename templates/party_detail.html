@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">
+  {{ party.name }} - 공통 공약 및 후보
+</h1>
+
+{% if party.common_pledges%}
+<h2 class="text-xl font-semibold mt-2 mb-2">공통 공약</h2>
+<ul class="list-disc list-inside mb-4">
+  {% for pledge in party.common_pledges %}
+  <li>{{ pledge.title }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% if party.notice %}
+<h2 class="text-xl font-semibold mt-2 mb-2">안내사항</h2>
+<ul class="list-disc list-inside mb-4">
+  <li>{{  party.notice }}</li>
+</ul>
+{% endif %}
+
+<h2 class="text-xl font-semibold mt-4 mb-2">후보 목록</h2>
+<ul>
+  {% for cand in party.candidates %}
+  <li class="mb-2">
+    <a href="{{ url_for('candidate_detail', party_slug=party.slug, candidate_index=loop.index0) }}" 
+       class="text-blue-600 hover:underline">
+      {{ cand.name }}
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

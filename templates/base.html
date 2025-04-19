@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>대한민국 정치 정보</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-gray-100">
+  <header class="bg-blue-800 text-white p-4">
+    <div class="container mx-auto flex justify-between items-center">
+      <a href="{{ url_for('index') }}" class="text-xl font-semibold">
+        제21대 대통령 대선
+      </a>
+      <span class="text-sm text-white/80" id="dday-text"></span>
+    </div>
+  </header>
+
+  <main class="container mx-auto p-4">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="bg-gray-200 text-sm text-gray-700 mt-10 p-4 border-t">
+    <div class="container mx-auto">
+      <p class="mb-1">
+        본 사이트는 대한민국 제 21대 대통령 선거의 후보 별 주요 내용과 논란을 쉽게 파악하기 위해 비영리를 목적으로 개발하였습니다.
+      </p>
+      <p class="mb-1">
+        본 사이트는 <strong>AI</strong>를 이용하여 대통령 선거 후보()의 <strong>언론 보도</strong>를 중심으로 정보를 수집·정리한 <strong>비공식 자료</strong>입니다. 선거관리위원회 등 공식 기관의 자료가 아니며, 일부 정보는 뉴스 출처에 따라 해석에 차이가 있을 수 있습니다.
+      </p>
+
+      <p class="mb-1">
+        선거공보가 게시되면 이를 반영하여 수정할 예정입니다.
+      </p>
+      <p class="mb-1">
+        AI 기반 질의응답은 다소 응답시간이 요구됩니다.
+      </p>
+      <p class="mb-1">
+        <strong>건의사항은 GitHub Issue</strong>를 통해 자유롭게 남겨주세요.
+      </p>
+      <p class="mb-1">
+        과도한 트래픽이 발생 시 별도의 서버로 이관 예정이며 운영 비용 문제로 인해 <strong>광고가 포함</strong> 될 수 있습니다.
+      </p>
+
+    </div>
+  </footer>
+
+  <script>
+    const electionDate = new Date("2025-06-03");
+    const today = new Date();
+    const diffTime = electionDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    const ddayText = document.getElementById("dday-text");
+    if (diffDays > 0) {
+      ddayText.textContent = `D-${diffDays}`;
+    } else if (diffDays === 0) {
+      ddayText.textContent = "오늘 선거일입니다!";
+    } else {
+      ddayText.textContent = `선거일로부터 ${Math.abs(diffDays)}일 지났습니다`;
+    }
+  </script>
+</body>
+</html>

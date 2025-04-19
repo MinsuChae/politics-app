@@ -1,0 +1,19 @@
+name: 💡 기능 제안
+description: 새로운 기능 또는 개선 아이디어를 제안합니다.
+title: "[FEATURE] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    attributes:
+      label: ✨ 제안 내용
+      description: 어떤 기능이 추가되면 좋을지 설명해주세요.
+      placeholder: "예: 정당별로 후보 정렬 기능이 있으면 좋겠습니다."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 📈 기대 효과
+      description: 이 기능이 사용자에게 어떤 도움을 줄까요?
+    validations:
+      required: false

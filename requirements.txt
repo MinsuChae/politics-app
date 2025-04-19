@@ -1,0 +1,4 @@
+Flask
+transformers
+torch
+accelerate

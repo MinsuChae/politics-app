@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">정당 목록</h1>
+
+<div class="mb-6">
+  <button id="toggle-all-chat" 
+          class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+    전체 후보 통합 챗봇 보기 →
+  </button>
+</div>
+
+<div id="all-chat-container" class="hidden bg-gray-100 p-4 rounded shadow mb-6">
+  <h2 class="text-lg font-semibold mb-2">질의응답</h2>
+  대통령 후보의 공약에 대해 궁금한 점을 질문하세요.<br>
+    <span class="text-xs text-gray-500">
+      ※ 한정된 정보만을 기반으로 gemma3으로 답변하며, 특정 후보나 정당, 특정 세력을 대표하는 답변이 아닙니다. LLM 모델의 사전학습된 내용과 최근 대통령 후보간의 정보가 혼재되어 일부 잘못된 내용이 있을 수 있습니다.
+    </span>
+  <div id="all-chat" class="border rounded h-64 overflow-auto bg-white p-3 space-y-2 text-sm mb-3"></div>
+  <div class="flex items-center">
+    <input type="text" id="all-question" 
+           class="border p-2 flex-1 rounded" 
+           placeholder="질문을 입력하세요." />
+    <button id="ask-all-btn" 
+            class="bg-blue-600 text-white px-4 py-2 ml-2 rounded hover:bg-blue-700">
+      질문
+    </button>
+  </div>
+</div>
+
+<!-- 기존 정당 카드들 -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  {% for party in parties %}
+  <div class="bg-white p-4 rounded shadow">
+    <h2 class="text-xl font-semibold mb-2">{{ party.name }}</h2>
+    {% if party.candidates|length == 1 %}
+      <p class="mb-2">후보자 : <strong>{{ party.candidates[0].name }}</strong></p>
+    {% else %}
+      <p class="mb-2">후보 수 : <strong>{{ party.candidates|length }}</strong>명</p>
+    {% endif %}
+    <a href="{{ url_for('party_detail', party_slug=party.slug) }}" 
+       class="text-blue-600 hover:underline">
+      자세히 보기 →
+    </a>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+  const chatAll = document.getElementById('all-chat');
+  const inputAll = document.getElementById('all-question');
+  const askAllBtn = document.getElementById('ask-all-btn');
+  const toggleBtn = document.getElementById('toggle-all-chat');
+  const chatContainer = document.getElementById('all-chat-container');
+
+  toggleBtn.addEventListener('click', () => {
+    const isHidden = chatContainer.classList.toggle('hidden');
+    toggleBtn.textContent = isHidden 
+      ? '전체 후보 통합 챗봇 보기 →' 
+      : '전체 후보 통합 챗봇 닫기 ←';
+  });
+
+  let isWaitingAll = false;
+
+  function addAllMsg(text, sender = 'user') {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = sender === 'user' ? 'text-right' : 'text-left';
+
+    const messageHTML = sender === 'ai'
+      ? marked.parse(text)
+      : text;
+
+    msgDiv.innerHTML = `
+      <span class="inline-block rounded px-3 py-2 ${
+        sender === 'user'
+          ? 'bg-blue-600 text-white'
+          : 'bg-gray-200 text-gray-800'
+      }">${messageHTML}</span>
+    `;
+    chatAll.appendChild(msgDiv);
+    chatAll.scrollTop = chatAll.scrollHeight;
+  }
+
+  function getAllChatHistory() {
+    const messages = [];
+    chatAll.childNodes.forEach(node => {
+      if (node.classList.contains('text-right')) {
+        messages.push({"role": "user", "content": node.textContent});
+      } else {
+        messages.push({"role": "assistant", "content": node.textContent});
+      }
+    });
+    return messages;
+  }
+
+  function askAll() {
+    if (isWaitingAll) {
+      alert("답변을 기다려주세요!");
+      return;
+    }
+    const question = inputAll.value.trim();
+    if (!question) {
+      alert("질문을 입력해주세요.");
+      return;
+    }
+
+    const chat_history = getAllChatHistory();
+
+    isWaitingAll = true;
+    inputAll.disabled = true;
+    askAllBtn.disabled = true;
+
+    addAllMsg(question, 'user');
+    inputAll.value = '';
+
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'text-left';
+    loadingDiv.setAttribute('id', 'loading-msg');
+    loadingDiv.innerHTML = `
+      <span class="inline-block rounded px-3 py-2 bg-gray-100 text-gray-500">
+        <span class="dot-typing">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+      </span>
+    `;
+    chatAll.appendChild(loadingDiv);
+    chatAll.scrollTop = chatAll.scrollHeight;    
+
+    fetch("{{ url_for('ask_all_candidates') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, chat_history })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.answer) {
+        addAllMsg(data.answer, 'ai');
+      } else if (data.error) {
+        addAllMsg("오류: " + data.error, 'ai');
+      }
+    })
+    .catch(() => {
+      console.error("오류");
+      addAllMsg("오류가 발생했습니다.", 'ai');
+    })
+    .finally(() => {
+      const loadingEl = document.getElementById('loading-msg');
+      if (loadingEl) loadingEl.remove();
+      isWaitingAll = false;
+      inputAll.disabled = false;
+      askAllBtn.disabled = false;
+      inputAll.focus();
+    });
+  }
+
+  askAllBtn.addEventListener('click', askAll);
+  inputAll.addEventListener('keyup', e => {
+    if (e.key === 'Enter' && inputAll.value.trim()){
+      askAll();
+    }
+  });
+</script>
+
+{% endblock %}
