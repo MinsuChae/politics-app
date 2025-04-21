@@ -132,13 +132,16 @@
       alert("답변을 기다려주세요!");
       return;
     }
-
+    isWaiting = true;
     const question = questionInput.value.trim();
-    if (!question) return;
+    if (!question){
+      isWaiting = false;
+      return;
+    } 
 
     const chat_history = getChatHistory();
 
-    isWaiting = true;
+    
     questionInput.disabled = true;
     askButton.disabled = true;
 
@@ -188,7 +191,6 @@
         questionInput.focus();
       });
   }
-  askButton.addEventListener('click', askQuestion);
   questionInput.addEventListener('keyup', e => {
     if (e.key === 'Enter' && questionInput.value.trim()){
       askQuestion();

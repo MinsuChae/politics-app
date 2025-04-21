@@ -98,15 +98,15 @@
       alert("답변을 기다려주세요!");
       return;
     }
+    isWaiting = true;
     const question = inputAll.value.trim();
-    if (!question) {
-      alert("질문을 입력해주세요.");
+    if (!question){
+      isWaitingAll = false;
       return;
-    }
+    } 
 
     const chat_history = getAllChatHistory();
 
-    isWaitingAll = true;
     inputAll.disabled = true;
     askAllBtn.disabled = true;
 
@@ -155,7 +155,6 @@
     });
   }
 
-  askAllBtn.addEventListener('click', askAll);
   inputAll.addEventListener('keyup', e => {
     if (e.key === 'Enter' && inputAll.value.trim()){
       askAll();
