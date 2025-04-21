@@ -12,13 +12,14 @@
 ## ▶️ 실행 방법
 ### ▶️ 웹사이트 접속
 - 공식 링크: [https://대선은지금.com](https://대선은지금.com)
+- 대한민국 제21 대통령선거를 위해 한시적으로 운영됩니다. 
 
 ### 🖥️ 로컬 실행
 ```bash
-git clone https://github.com/yourname/politics-app.git
+git clone https://github.com/minsuchae/politics-app.git
 cd politics-app
 python3 -m venv venv
-source venv/bin/activate   # Windows는 venv\Scripts\activate
+source venv/bin/activate
 pip install -r requirements.txt
 python app.py
 ```
@@ -26,7 +27,8 @@ python app.py
 - 한 사람에 의해 해당 프로젝트가 관리하고 있으며, 주업무가 아니기 때문에 요청 사항에 대해 빠른 반응이 어려울 수 있습니다.
 - 모든 기여와 문의는 환영하며, 가능한 한 빨리 답변드리도록 하겠습니다.
 - 프로젝트 문의 및 기여는 GitHub 이슈 또는 Pull Request를 통해 할 수 있습니다.
-- 2025년 대통령 대선까지 주요한 버그 수정 외에 기능적 추가적인 PR은 후순위에 밀려납니다.
+- 2025년 대통령 대선까지 주요한 버그 수정 외에 추가기능 PR은 후순위에 밀립니다.
+- 인공지능을 활용하여 빠르게 만들다보니 테스트코드가 없으며 수기로 테스트하였습니다.
 
 ## 📚 기술 스택
 - Flask
@@ -62,8 +64,8 @@ politics_app/
 - 정당 및 후보 관련 정보는 중앙선거관리위원회의 제21대 대통령선거 정당 정책을 확인하여 업데이트됩니다.
 - 정보 수정 및 삭제 요청은 선거의 공정성을 위해 잘못된 정보에 한해서만 반영됩니다.
 - 대통령 후보자 및 선거캠프 관련자분들께서는 보시기 불편하더라도 양해부탁드립니다.
-- 인공지능을 이용하여 빠르게 만들다보니 개별 테스트 유닛없이 수기로 테스트하였습니다.
+- AI 답변은 LLM 모델의 환각증상으로 인해 잘못된 내용이 나올 수 있습니다.
 
 ## 💰 서버 비용 및 지원
-- LLM 답변 퀄리티를 우선시할 경우 Google Gemma3-27b-it 모델이 적합하지만, 서버 운영 비용을 고려하여 현재는 Gemma3-1b-it 모델로 운영하고 있습니다.
+- LLM 답변 퀄리티를 우선시할 경우 Google Gemma3-27b-it 모델이 적합하지만, 서버 운영 비용을 고려하여  Gemma3-1b-it 모델로 운영하고 있습니다.
 - Gemma3-27b-it 모델로 서버 운영 시 최소 운영 비용은 월 60만원이상입니다. 클라우드 리소스나 크레딧을 지원할 수 있는 기관 및 업체의 협조를 환영합니다.

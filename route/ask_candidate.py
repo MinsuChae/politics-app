@@ -34,12 +34,12 @@ def __build_chat_messages(context_text, chat_history, question):
     }
     messages = [system_prompt,
                 {"role": "user", "content": context_text}, 
-                {"role": "assistant", "content": "Okay"}
+                {"role": "assistant", "content": "이해했습니다. 또한 다음답변부터는 한국어로 답변하겠습니다."}
                 ]
 
     expected_roles = ["user", "assistant"]
     last_role = None
-    for msg in chat_history[-4:]:
+    for msg in chat_history:
         role = msg.get("role")
         content = msg.get("content", "").strip()
         if role not in expected_roles or not content or role == last_role:

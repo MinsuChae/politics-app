@@ -1,4 +1,5 @@
 import json
+import os
 
 _data = None
 _parties = None
@@ -7,9 +8,16 @@ _parties_by_slug = None
 def _load_json():
     global _data, _parties, _parties_by_slug
     try:
-        with open('data/sample_data.json', 'r', encoding='utf-8') as f:
-            _data = json.load(f)
+        official_data = 'data/data.json'
+        unofficial_data = 'data/sample_data.json'
+        
+        path = unofficial_data
+        if os.path.exists(official_data):
+            path = official_data
 
+        with open(path, 'r', encoding='utf-8') as f:
+                _data = json.load(f)
+                
         _parties = _data.get("parties", [])
         _parties_by_slug = {party["slug"]: party for party in _parties}
     except Exception as e:
