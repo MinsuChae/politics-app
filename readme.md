@@ -23,6 +23,17 @@ source venv/bin/activate
 pip install -r requirements.txt
 python app.py
 ```
+
+### 🖥️ 로컬 실행(docker 기반)
+```bash
+git clone https://github.com/minsuchae/politics-app.git politics-app
+cd politics-app
+cp docker.env.sample docker.env
+vi docker.env
+sudo docker build -t politics_app .
+sudo docker create --restart always --name politics_app_container -p 5000:5000 --env-file docker.env politics_app
+sudo docker start politics_app_container
+```
 ## 🤝 기여 & 문의
 - 한 사람에 의해 해당 프로젝트가 관리하고 있으며, 주업무가 아니기 때문에 요청 사항에 대해 빠른 반응이 어려울 수 있습니다.
 - 모든 기여와 문의는 환영하며, 가능한 한 빨리 답변드리도록 하겠습니다.
