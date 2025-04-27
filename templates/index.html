@@ -1,5 +1,8 @@
 {% extends 'base.html' %}
 
+{% block sub_title %}
+{% endblock %}
+
 {% block content %}
 <div class="mb-6">
   <h2 class="text-lg font-semibold mb-2">여론조사</h2>
@@ -8,6 +11,38 @@
 </div>
 
 <h1 class="text-2xl font-bold mb-4">정당 목록</h1>
+
+<div class="mb-6">
+  <button id="toggle-vote" 
+          class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+    역대 대통령선거 투표율 보기 →
+  </button>
+</div>
+
+<div id="toggle-vote-container" class="hidden bg-gray-100 p-4 rounded shadow mb-6">
+  <h2 class="text-lg font-semibold mb-2">역대 대통령선거 투표율</h2>
+  <ul class="list-disc list-inside mb-6">
+      <li class="mb-2">
+        제16대 : 70.8%
+      </li>
+      <li class="mb-2">
+        제17대 : 63.0%
+      </li>
+      <li class="mb-2">
+        제18대 : 75.8%
+
+      </li>
+      <li class="mb-2">
+        제19대 : 77.2%
+      </li>
+      <li class="mb-2">
+        제20대 : 77.1%
+      </li>
+  </ul>
+  <h2 class="text-lg font-semibold mb-2">제21대 대통령 선거 지역 투표율</h2>
+  <img src="http://info.nec.go.kr/common/images/renewal/barchat_president_20.gif">
+</div>
+
 
 <div class="mb-6">
   <button id="toggle-all-chat" 
@@ -64,6 +99,16 @@
     toggleBtn.textContent = isHidden 
       ? '전체 후보 통합 챗봇 보기 →' 
       : '전체 후보 통합 챗봇 닫기 ←';
+  });
+
+  const toggleBtn2 = document.getElementById('toggle-vote');
+  const voteContainer = document.getElementById('toggle-vote-container');
+
+  toggleBtn2.addEventListener('click', () => {
+    const isHidden = voteContainer.classList.toggle('hidden');
+    toggleBtn2.textContent = isHidden 
+      ? '역대 대통령선거 투표율 보기 →' 
+      : '역대 대통령선거 투표율 보기 ←';
   });
 
   let isWaitingAll = false;

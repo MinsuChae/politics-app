@@ -21,4 +21,4 @@ app.add_url_rule('/party/<party_slug>/candidate/<int:candidate_index>/ask', view
 app.add_url_rule('/ask/all', view_func=ask_all_candidates, methods=['POST'])
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5050, debug=False)
+    app.run(debug=False)

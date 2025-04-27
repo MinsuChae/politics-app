@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 
+
+{% block sub_title %}
+ - {{ party.name  }} 정당 페이지
+{% endblock %}
+
 {% block content %}
 <h1 class="text-2xl font-bold mb-4">
   {{ party.name }} - 공통 공약 및 후보

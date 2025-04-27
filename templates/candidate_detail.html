@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 
+
+{% block sub_title %}
+ - {{ candidate.name }} 후보 공약 페이지
+{% endblock %}
+
 {% block content %}
 {% if party.candidates|length > 1 %}
   <a href="{{ url_for('party_detail', party_slug=party.slug) }}"
@@ -23,20 +28,42 @@
   {% if candidate.campaign_team %}
     <p><strong>선거캠프:</strong> {{ candidate.campaign_team }}</p>
   {% endif %}
+  {% if candidate.Illegal %}
+    <p><strong>전과기록유무(건수):</strong> {{ candidate.Illegal }}</p>
+  {% endif %}
   <p><strong>약력:</strong> {{ candidate.biography }}</p>
   {% if candidate.namu %}
   <p><strong>참고:</strong> <a href="{{ candidate.namu }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">나무위키</a></p>
   {% endif %}
 </div>
+
 {% if candidate.pledges and candidate.pledges|length > 0 %}
 <h2 class="text-xl font-semibold mb-2">공약</h2>
-<ul class="list-disc list-inside mb-6">
+<div class="space-y-4">
   {% for pledge in candidate.pledges %}
-  <li>{{ pledge.title }}</li>
+  <div x-data="{ open: false }" class="border rounded-lg p-4">
+    <button @click="open = !open" class="w-full flex justify-between items-center text-left focus:outline-none">
+      <span class="font-medium">{{ pledge.title }}</span>
+      <svg :class="{ 'rotate-180': open }" class="w-5 h-5 transform transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
+    <div x-show="open" x-cloak class="mt-3 space-y-2 text-gray-700 text-sm">
+      {% if pledge.detail %}
+      <p>{{ pledge.detail }}</p>
+      {% endif %}
+      {% if pledge.source %}
+      <p>🔗 
+        <a href="{{ pledge.source }}" target="_blank" class="text-blue-500 hover:underline">
+          관련 기사 보기
+        </a>
+      </p>
+      {% endif %}
+    </div>
+  </div>
   {% endfor %}
-</ul>
+</div>
 {% endif %}
-
 
 {% if candidate.controversies and candidate.controversies|length > 0 %}
   <h2 class="text-xl font-semibold mb-2">논란</h2>
